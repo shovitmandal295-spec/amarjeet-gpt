@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amarjeet GPT</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #212121;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 15px 20px;
+      background: #171717;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .message {
+      max-width: 800px;
+      margin: 10px auto;
+      padding: 12px 15px;
+      border-radius: 12px;
+      line-height: 1.5;
+    }
+
+    .user {
+      background: #343541;
+    }
+
+    .bot {
+      background: #444654;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      background: #171717;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 16px;
+      background: #2f2f2f;
+      color: white;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 0 20px;
+      background: #10a37f;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>🤖 Amarjeet GPT</header>
+
+  <div id="messages"></div>
+
+  <div class="input-area">
+    <textarea id="input" rows="1" placeholder="अपना सवाल लिखें..."></textarea>
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("input");
+      const messages = document.getElementById("messages");
+
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      messages.innerHTML += `
+        <div class="message user">
+          <b>You:</b> ${text}
+        </div>
+      `;
+
+      input.value = "";
+
+      messages.innerHTML += `
+        <div class="message bot" id="loading">
+          Amarjeet GPT सोच रहा है...
+        </div>
+      `;
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: text
+          })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").remove();
+
+        messages.innerHTML += `
+          <div class="message bot">
+            <b>Amarjeet GPT:</b> ${data.reply || "कोई जवाब नहीं मिला।"}
+          </div>
+        `;
+
+      } catch (error) {
+        document.getElementById("loading").innerText =
+          "Server से connection नहीं हो पाया।";
+      }
+
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
